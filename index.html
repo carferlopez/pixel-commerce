@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Pixel Shop</title>
+  <link id="google-font" rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
+
+  <style>
+    /* ─── RESET & BASE ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #1a1a2e;
+      --panel:        #16213e;
+      --border:       #e94560;
+      --text:         #eaeaea;
+      --text-dim:     #888;
+      --accent:       #e94560;
+      --verb-bg:      #0f3460;
+      --verb-hover:   #e94560;
+      --inventory-bg: #0f3460;
+      --font:         'Press Start 2P', monospace;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: var(--font);
+      cursor: none; /* usamos cursor custom */
+    }
+
+    /* ─── CURSOR CUSTOM ─────────────────────────────────────────────────── */
+    #custom-cursor {
+      position: fixed;
+      width: 16px; height: 16px;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-2px, -2px);
+      image-rendering: pixelated;
+    }
+
+    /* ─── GAME WRAPPER ──────────────────────────────────────────────────── */
+    #game {
+      position: relative;
+      width: 800px;
+      height: 600px; /* 450 escena + 150 UI inferior */
+      background: var(--bg);
+      border: 2px solid var(--border);
+      overflow: hidden;
+      image-rendering: pixelated;
+    }
+
+    /* ─── ESCENA ────────────────────────────────────────────────────────── */
+    #scene {
+      position: absolute;
+      top: 0; left: 0;
+      width: 800px; height: 450px;
+      background: var(--bg);
+      overflow: hidden;
+    }
+
+    #scene-bg {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      image-rendering: pixelated;
+      display: block;
+    }
+
+    /* Fondo SVG placeholder cuando no hay imagen */
+    #scene-bg-fallback {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ─── HOTSPOTS ──────────────────────────────────────────────────────── */
+    .hotspot {
+      position: absolute;
+      cursor: none;
+      border: 1px dashed transparent;
+      transition: border-color 0.1s;
+    }
+    .hotspot:hover { border-color: var(--accent); }
+
+    .hotspot-label {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 4px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 6px;
+      padding: 3px 6px;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .hotspot:hover .hotspot-label { display: block; }
+
+    /* ─── NPC SPRITE ────────────────────────────────────────────────────── */
+    #npc {
+      position: absolute;
+      bottom: 20px;
+      right: 80px;
+      width: 80px;
+      height: 140px;
+      cursor: none;
+      image-rendering: pixelated;
+    }
+
+    #npc-sprite-placeholder {
+      width: 80px; height: 140px;
+    }
+
+    /* ─── VERB BAR ──────────────────────────────────────────────────────── */
+    #ui-bar {
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 800px; height: 150px;
+      background: var(--verb-bg);
+      border-top: 2px solid var(--border);
+      display: grid;
+      grid-template-columns: 1fr 220px;
+    }
+
+    #verb-section {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 12px 16px;
+      gap: 8px;
+    }
+
+    #action-line {
+      font-size: 7px;
+      color: var(--text);
+      min-height: 14px;
+      letter-spacing: 0.5px;
+    }
+
+    #verb-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4px;
+    }
+
+    .verb-btn {
+      font-family: var(--font);
+      font-size: 6px;
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 6px 2px;
+      cursor: none;
+      text-align: center;
+      transition: background 0.1s, color 0.1s;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .verb-btn:hover  { background: var(--verb-hover); color: #fff; }
+    .verb-btn.active { background: var(--accent); color: #fff; border-color: #fff; }
+
+    /* ─── INVENTARIO ────────────────────────────────────────────────────── */
+    #inventory {
+      background: var(--inventory-bg);
+      border-left: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #inventory-title {
+      font-size: 6px;
+      color: var(--text-dim);
+      text-align: center;
+      padding: 6px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 1px;
+    }
+
+    #inventory-slots {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      padding: 6px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .inv-slot {
+      aspect-ratio: 1;
+      border: 1px solid var(--border);
+      background: rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: none;
+      position: relative;
+      transition: background 0.1s;
+    }
+    .inv-slot:hover    { background: rgba(233,69,96,0.2); }
+    .inv-slot.occupied { border-color: var(--accent); }
+    .inv-slot.dragging { opacity: 0.5; }
+
+    /* ─── DIÁLOGO ────────────────────────────────────────────────────────── */
+    #dialogue-overlay {
+      display: none;
+      position: absolute;
+      bottom: 150px; left: 0;
+      width: 800px;
+      background: rgba(15, 52, 96, 0.97);
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+      padding: 16px 20px;
+      z-index: 100;
+    }
+    #dialogue-overlay.visible { display: block; }
+
+    #dialogue-speaker {
+      font-size: 7px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    #dialogue-text {
+      font-size: 7px;
+      color: var(--text);
+      line-height: 1.8;
+      margin-bottom: 12px;
+      min-height: 28px;
+    }
+
+    #dialogue-choices {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .dialogue-choice {
+      font-family: var(--font);
+      font-size: 6px;
+      color: var(--text-dim);
+      background: transparent;
+      border: none;
+      text-align: left;
+      cursor: none;
+      padding: 4px 0;
+      transition: color 0.1s;
+    }
+    .dialogue-choice::before { content: '▸ '; color: var(--accent); }
+    .dialogue-choice:hover { color: var(--text); }
+
+    /* ─── CATÁLOGO MODAL ─────────────────────────────────────────────────── */
+    #catalog-overlay {
+      display: none;
+      position: absolute;
+      inset: 0;
+      background: rgba(10,10,20,0.95);
+      z-index: 200;
+      flex-direction: column;
+      padding: 20px;
+    }
+    #catalog-overlay.visible { display: flex; }
+
+    #catalog-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+    }
+
+    #catalog-title {
+      font-size: 8px;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    #catalog-close {
+      font-family: var(--font);
+      font-size: 8px;
+      color: var(--text-dim);
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      cursor: none;
+    }
+    #catalog-close:hover { color: var(--text); border-color: var(--text); }
+
+    #catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .catalog-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      transition: border-color 0.15s;
+    }
+    .catalog-card:hover { border-color: var(--text); }
+    .catalog-card.unavailable { opacity: 0.5; }
+
+    .card-badge {
+      position: absolute;
+      top: 6px; right: 6px;
+      font-size: 5px;
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .card-image {
+      width: 100%;
+      aspect-ratio: 1;
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      image-rendering: pixelated;
+      overflow: hidden;
+    }
+    .card-image img { width: 100%; height: 100%; object-fit: cover; image-rendering: pixelated; }
+
+    .card-name {
+      font-size: 6px;
+      color: var(--text);
+      letter-spacing: 0.5px;
+    }
+
+    .card-desc {
+      font-size: 5px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      flex: 1;
+    }
+
+    .card-price {
+      font-size: 8px;
+      color: var(--accent);
+    }
+
+    .card-btn {
+      font-family: var(--font);
+      font-size: 6px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 7px;
+      cursor: none;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: background 0.1s;
+    }
+    .card-btn:hover    { background: #fff; color: var(--accent); }
+    .card-btn:disabled { background: var(--text-dim); cursor: none; }
+
+    /* ─── NOTIFICACIÓN ───────────────────────────────────────────────────── */
+    #notification {
+      display: none;
+      position: absolute;
+      top: 16px; left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      font-size: 6px;
+      padding: 8px 16px;
+      z-index: 300;
+      white-space: nowrap;
+      letter-spacing: 0.5px;
+    }
+    #notification.visible { display: block; }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR CUSTOM (SVG pixel art) -->
+<svg id="custom-cursor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <polygon points="1,1 1,13 4,10 6,15 8,14 6,9 10,9" fill="#eaeaea" stroke="#000" stroke-width="0.5"/>
+</svg>
+
+<!-- ─── GAME ──────────────────────────────────────────────────────────────── -->
+<div id="game">
+
+  <!-- NOTIFICACIÓN FLOTANTE -->
+  <div id="notification"></div>
+
+  <!-- ESCENA -->
+  <div id="scene">
+
+    <!-- Fondo: imagen o SVG placeholder -->
+    <div id="scene-bg-fallback">
+      <svg width="800" height="450" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg">
+        <!-- Suelo -->
+        <rect width="800" height="450" fill="#1a1a2e"/>
+        <rect y="340" width="800" height="110" fill="#0d0d1a"/>
+        <!-- Línea horizonte -->
+        <line x1="0" y1="340" x2="800" y2="340" stroke="#e94560" stroke-width="1" opacity="0.4"/>
+        <!-- Estantes -->
+        <rect x="40" y="80" width="200" height="12" fill="#0f3460"/>
+        <rect x="40" y="140" width="200" height="12" fill="#0f3460"/>
+        <rect x="40" y="200" width="200" height="12" fill="#0f3460"/>
+        <rect x="36" y="80" width="6" height="132" fill="#0f3460"/>
+        <rect x="238" y="80" width="6" height="132" fill="#0f3460"/>
+        <!-- Objetos estante (placeholders) -->
+        <rect x="60"  y="55" width="20" height="25" fill="#e94560" opacity="0.7"/>
+        <rect x="90"  y="60" width="16" height="20" fill="#888" opacity="0.7"/>
+        <rect x="115" y="50" width="24" height="30" fill="#4fc3f7" opacity="0.6"/>
+        <rect x="155" y="58" width="18" height="22" fill="#e94560" opacity="0.5"/>
+        <rect x="60"  y="115" width="22" height="25" fill="#888" opacity="0.6"/>
+        <rect x="100" y="118" width="30" height="22" fill="#4fc3f7" opacity="0.5"/>
+        <!-- Lámpara techo -->
+        <line x1="400" y1="0" x2="400" y2="40" stroke="#888" stroke-width="2"/>
+        <polygon points="375,40 425,40 415,70 385,70" fill="#0f3460" stroke="#e94560" stroke-width="1"/>
+        <ellipse cx="400" cy="68" rx="20" ry="6" fill="#e94560" opacity="0.15"/>
+        <!-- Ventana -->
+        <rect x="580" y="60" width="160" height="120" fill="#0a0a1a" stroke="#0f3460" stroke-width="3"/>
+        <line x1="660" y1="60" x2="660" y2="180" stroke="#0f3460" stroke-width="2"/>
+        <line x1="580" y1="120" x2="740" y2="120" stroke="#0f3460" stroke-width="2"/>
+        <!-- Estrellas en ventana -->
+        <circle cx="610" cy="85" r="1" fill="#eaeaea" opacity="0.8"/>
+        <circle cx="630" cy="100" r="1" fill="#eaeaea" opacity="0.6"/>
+        <circle cx="695" cy="78" r="1" fill="#eaeaea" opacity="0.9"/>
+        <circle cx="715" cy="95" r="1.5" fill="#eaeaea" opacity="0.7"/>
+        <circle cx="700" cy="145" r="1" fill="#eaeaea" opacity="0.5"/>
+        <circle cx="625" cy="155" r="1" fill="#eaeaea" opacity="0.8"/>
+        <!-- Mostrador -->
+        <rect x="280" y="290" width="280" height="50" fill="#0f3460" stroke="#e94560" stroke-width="1"/>
+        <rect x="270" y="280" width="300" height="14" fill="#16213e" stroke="#e94560" stroke-width="1"/>
+        <!-- Texto TIENDA -->
+        <text x="400" y="270" text-anchor="middle" font-family="monospace" font-size="10" fill="#e94560" opacity="0.3" letter-spacing="6">THE PIXEL SHOP</text>
+      </svg>
+    </div>
+
+    <!-- HOTSPOTS (posicionados sobre la escena SVG) -->
+
+    <!-- Estantería: abre catálogo -->
+    <div class="hotspot" id="hs-shelves"
+         data-name="Estantería"
+         data-verbs='{"Mirar":"Hay cosas interesantes en esos estantes.", "Coger":"Mejor pedir permiso primero.", "Usar":"No es el momento.", "Hablar":""}'
+         style="left:36px; top:50px; width:212px; height:165px;">
+      <span class="hotspot-label">Estantería</span>
+    </div>
+
+    <!-- Ventana -->
+    <div class="hotspot" id="hs-window"
+         data-name="Ventana"
+         data-verbs='{"Mirar":"Fuera solo hay más noche. Dentro hay más interesante.", "Coger":"No puedes coger la noche.", "Usar":"No aplica.", "Hablar":""}'
+         style="left:578px; top:58px; width:164px; height:124px;">
+      <span class="hotspot-label">Ventana</span>
+    </div>
+
+    <!-- Mostrador -->
+    <div class="hotspot" id="hs-counter"
+         data-name="Mostrador"
+         data-verbs='{"Mirar":"Un mostrador pulido. Hay algo escrito debajo del cristal.", "Coger":"Demasiado pesado.", "Usar":"Podrías dejar algo aquí.", "Hablar":""}'
+         style="left:270px; top:278px; width:302px; height:64px;">
+      <span class="hotspot-label">Mostrador</span>
+    </div>
+
+    <!-- NPC: Ada — centrada en la zona abierta, delante del mostrador -->
+    <div class="hotspot" id="hs-npc"
+         data-name="Ada"
+         data-verbs='{"Mirar":"Una mujer que parece saber exactamente lo que buscas.", "Coger":"No es apropiado.", "Usar":"No es apropiado.", "Hablar":"talk_to_npc"}'
+         style="left:468px; top:158px; width:96px; height:160px;">
+      <span class="hotspot-label">Ada</span>
+
+      <!-- Sprite NPC placeholder -->
+      <div id="npc-sprite-placeholder">
+        <svg width="80" height="150" viewBox="0 0 80 150" xmlns="http://www.w3.org/2000/svg" style="margin:6px 0 0 8px; image-rendering:pixelated;">
+          <!-- Sombra suelo -->
+          <ellipse cx="40" cy="146" rx="22" ry="4" fill="#000" opacity="0.5"/>
+          <!-- Piernas -->
+          <rect x="26" y="108" width="12" height="34" fill="#3d2060"/>
+          <rect x="42" y="108" width="12" height="34" fill="#3d2060"/>
+          <!-- Pies -->
+          <rect x="22" y="136" width="18" height="8" fill="#1a1020"/>
+          <rect x="40" y="136" width="18" height="8" fill="#1a1020"/>
+          <!-- Cuerpo: vestido burdeos visible -->
+          <rect x="22" y="50" width="36" height="62" fill="#7a1e3a" stroke="#e94560" stroke-width="2"/>
+          <!-- Detalle vertical vestido -->
+          <rect x="36" y="54" width="8" height="28" fill="#9a2848"/>
+          <!-- Cinturón -->
+          <rect x="22" y="78" width="36" height="4" fill="#e94560"/>
+          <!-- Brazos -->
+          <rect x="8"  y="52" width="14" height="10" fill="#7a1e3a" stroke="#e94560" stroke-width="1"/>
+          <rect x="58" y="52" width="14" height="10" fill="#7a1e3a" stroke="#e94560" stroke-width="1"/>
+          <!-- Manos -->
+          <rect x="9"  y="60" width="10" height="8" fill="#d4a06a"/>
+          <rect x="61" y="60" width="10" height="8" fill="#d4a06a"/>
+          <!-- Cuello -->
+          <rect x="34" y="42" width="12" height="10" fill="#d4a06a"/>
+          <!-- Cabeza -->
+          <rect x="24" y="12" width="32" height="32" fill="#d4a06a"/>
+          <!-- Pelo negro azabache -->
+          <rect x="22" y="10" width="36" height="10" fill="#0d0010"/>
+          <rect x="18" y="14" width="8"  height="24" fill="#0d0010"/>
+          <rect x="54" y="14" width="8"  height="24" fill="#0d0010"/>
+          <rect x="22" y="36" width="8"  height="8"  fill="#0d0010"/>
+          <rect x="50" y="36" width="8"  height="8"  fill="#0d0010"/>
+          <!-- Ojos rojos (marca del personaje) -->
+          <rect x="29" y="24" width="6" height="6" fill="#e94560"/>
+          <rect x="45" y="24" width="6" height="6" fill="#e94560"/>
+          <!-- Brillo ojo -->
+          <rect x="32" y="25" width="2" height="2" fill="#ffaaaa"/>
+          <rect x="48" y="25" width="2" height="2" fill="#ffaaaa"/>
+          <!-- Boca -->
+          <rect x="33" y="36" width="14" height="3" fill="#7a1e2a"/>
+          <rect x="35" y="35" width="10" height="2" fill="#e94560" opacity="0.6"/>
+        </svg>
+      </div>
+    </div>
+
+  </div><!-- /#scene -->
+
+  <!-- DIÁLOGO -->
+  <div id="dialogue-overlay">
+    <div id="dialogue-speaker">Ada</div>
+    <div id="dialogue-text"></div>
+    <div id="dialogue-choices"></div>
+  </div>
+
+  <!-- UI BAR -->
+  <div id="ui-bar">
+
+    <div id="verb-section">
+      <div id="action-line">Selecciona un verbo y haz click en la escena.</div>
+      <div id="verb-grid">
+        <button class="verb-btn active" data-verb="Mirar">Mirar</button>
+        <button class="verb-btn"        data-verb="Coger">Coger</button>
+        <button class="verb-btn"        data-verb="Usar">Usar</button>
+        <button class="verb-btn"        data-verb="Hablar">Hablar</button>
+      </div>
+    </div>
+
+    <div id="inventory">
+      <div id="inventory-title">INVENTARIO</div>
+      <div id="inventory-slots">
+        <!-- 9 slots vacíos -->
+        <div class="inv-slot" data-slot="0"></div>
+        <div class="inv-slot" data-slot="1"></div>
+        <div class="inv-slot" data-slot="2"></div>
+        <div class="inv-slot" data-slot="3"></div>
+        <div class="inv-slot" data-slot="4"></div>
+        <div class="inv-slot" data-slot="5"></div>
+        <div class="inv-slot" data-slot="6"></div>
+        <div class="inv-slot" data-slot="7"></div>
+        <div class="inv-slot" data-slot="8"></div>
+      </div>
+    </div>
+
+  </div><!-- /#ui-bar -->
+
+  <!-- CATÁLOGO MODAL -->
+  <div id="catalog-overlay">
+    <div id="catalog-header">
+      <div id="catalog-title">— CATÁLOGO —</div>
+      <button id="catalog-close">✕ CERRAR</button>
+    </div>
+    <div id="catalog-grid"></div>
+  </div>
+
+</div><!-- /#game -->
+
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+//  PIXEL COMMERCE — Motor principal
+//  Todos los datos vienen de data/config.json, data/catalogue.json, data/dialogue.json
+// ═══════════════════════════════════════════════════════════════════════════
+
+const Game = (() => {
+
+  // ── Estado ──────────────────────────────────────────────────────────────
+  const state = {
+    activeVerb:     'Mirar',
+    inventory:      [],        // { id, emoji, name }
+    dialogueNode:   null,
+    config:         null,
+    catalog:        null,
+    dialogue:       null,
+  };
+
+  // ── Elementos DOM ────────────────────────────────────────────────────────
+  const el = {
+    cursor:           document.getElementById('custom-cursor'),
+    actionLine:       document.getElementById('action-line'),
+    verbBtns:         document.querySelectorAll('.verb-btn'),
+    invSlots:         document.querySelectorAll('.inv-slot'),
+    dialogueOverlay:  document.getElementById('dialogue-overlay'),
+    dialogueSpeaker:  document.getElementById('dialogue-speaker'),
+    dialogueText:     document.getElementById('dialogue-text'),
+    dialogueChoices:  document.getElementById('dialogue-choices'),
+    catalogOverlay:   document.getElementById('catalog-overlay'),
+    catalogGrid:      document.getElementById('catalog-grid'),
+    catalogClose:     document.getElementById('catalog-close'),
+    notification:     document.getElementById('notification'),
+    hotspots:         document.querySelectorAll('.hotspot'),
+  };
+
+  // ── Cursor custom ────────────────────────────────────────────────────────
+  function initCursor() {
+    document.addEventListener('mousemove', e => {
+      el.cursor.style.left = e.clientX + 'px';
+      el.cursor.style.top  = e.clientY + 'px';
+    });
+  }
+
+  // ── Notificación ─────────────────────────────────────────────────────────
+  let notifTimer;
+  function notify(msg, ms = 2500) {
+    el.notification.textContent = msg;
+    el.notification.classList.add('visible');
+    clearTimeout(notifTimer);
+    notifTimer = setTimeout(() => el.notification.classList.remove('visible'), ms);
+  }
+
+  // ── Verb bar ─────────────────────────────────────────────────────────────
+  function initVerbBar() {
+    el.verbBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeVerb = btn.dataset.verb;
+        el.verbBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        el.actionLine.textContent = `${state.activeVerb} …`;
+      });
+    });
+  }
+
+  // ── Hotspots ──────────────────────────────────────────────────────────────
+  function initHotspots() {
+    el.hotspots.forEach(hs => {
+      hs.addEventListener('mouseenter', () => {
+        el.actionLine.textContent = `${state.activeVerb} ${hs.dataset.name}`;
+      });
+      hs.addEventListener('mouseleave', () => {
+        el.actionLine.textContent = `${state.activeVerb} …`;
+      });
+      hs.addEventListener('click', () => handleHotspot(hs));
+    });
+  }
+
+  function handleHotspot(hs) {
+    const verbs   = JSON.parse(hs.dataset.verbs);
+    const verb    = state.activeVerb;
+    const response = verbs[verb] ?? '';
+
+    if (verb === 'Hablar' && response === 'talk_to_npc') {
+      openDialogue(state.dialogue.start);
+      return;
+    }
+
+    if (response) notify(response);
+  }
+
+  // ── Diálogo ───────────────────────────────────────────────────────────────
+  function openDialogue(nodeId) {
+    const node = state.dialogue.nodes[nodeId];
+    if (!node) return;
+
+    state.dialogueNode = nodeId;
+    el.dialogueSpeaker.textContent = node.speaker || state.config.npc.name;
+    el.dialogueText.textContent    = node.text;
+    el.dialogueChoices.innerHTML   = '';
+
+    if (node.choices && node.choices.length > 0) {
+      node.choices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className   = 'dialogue-choice';
+        btn.textContent = choice.label;
+        btn.addEventListener('click', () => advanceDialogue(choice.next));
+        el.dialogueChoices.appendChild(btn);
+      });
+    }
+
+    el.dialogueOverlay.classList.add('visible');
+
+    if (node.action) handleDialogueAction(node.action);
+  }
+
+  function advanceDialogue(nextId) {
+    const nextNode = state.dialogue.nodes[nextId];
+    if (!nextNode) { closeDialogue(); return; }
+
+    // Si el siguiente nodo no tiene choices => auto-avanzar tras acción
+    if (nextNode.action === 'OPEN_CATALOG') {
+      closeDialogue();
+      setTimeout(openCatalog, 300);
+      return;
+    }
+    if (nextNode.action === 'CLOSE_DIALOGUE') {
+      closeDialogue();
+      return;
+    }
+
+    openDialogue(nextId);
+  }
+
+  function handleDialogueAction(action) {
+    if (action === 'OPEN_CATALOG') {
+      closeDialogue();
+      setTimeout(openCatalog, 300);
+    }
+    if (action === 'CLOSE_DIALOGUE') {
+      closeDialogue();
+    }
+  }
+
+  function closeDialogue() {
+    el.dialogueOverlay.classList.remove('visible');
+    state.dialogueNode = null;
+  }
+
+  // ── Catálogo ──────────────────────────────────────────────────────────────
+  function openCatalog() {
+    el.catalogOverlay.classList.add('visible');
+  }
+
+  function closeCatalog() {
+    el.catalogOverlay.classList.remove('visible');
+  }
+
+  function renderCatalog() {
+    el.catalogGrid.innerHTML = '';
+
+    state.catalog.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'catalog-card' + (item.available ? '' : ' unavailable');
+
+      const price = item.price.toLocaleString(
+        state.config.store.locale ?? 'es-ES',
+        { style: 'currency', currency: item.currency ?? 'EUR' }
+      );
+
+      const imageContent = item.image
+        ? `<img src="${item.image}" alt="${item.name}">`
+        : `<span style="font-size:36px;opacity:0.3">?</span>`;
+
+      card.innerHTML = `
+        ${item.badge ? `<div class="card-badge">${item.badge}</div>` : ''}
+        <div class="card-image">${imageContent}</div>
+        <div class="card-name">${item.name}</div>
+        <div class="card-desc">${item.description}</div>
+        <div class="card-price">${price}</div>
+        <button class="card-btn"
+          ${!item.available ? 'disabled' : ''}
+          data-stripe="${item.stripeUrl}">
+          ${item.available ? 'COMPRAR' : 'AGOTADO'}
+        </button>
+      `;
+
+      if (item.available) {
+        card.querySelector('.card-btn').addEventListener('click', () => {
+          window.open(item.stripeUrl, '_blank');
+        });
+      }
+
+      el.catalogGrid.appendChild(card);
+    });
+  }
+
+  // ── Inventario ────────────────────────────────────────────────────────────
+  function renderInventory() {
+    el.invSlots.forEach((slot, i) => {
+      const item = state.inventory[i];
+      slot.innerHTML  = item ? item.emoji : '';
+      slot.title      = item ? item.name  : '';
+      slot.classList.toggle('occupied', !!item);
+    });
+  }
+
+  function addToInventory(item) {
+    if (state.inventory.length >= 9) { notify('Inventario lleno.'); return; }
+    state.inventory.push(item);
+    renderInventory();
+    notify(`+ ${item.name}`);
+  }
+
+  // ── Carga de datos ────────────────────────────────────────────────────────
+  async function loadJSON(path) {
+    const res = await fetch(path);
+    if (!res.ok) throw new Error(`No se pudo cargar ${path}`);
+    return res.json();
+  }
+
+  async function loadData() {
+    const [config, catalog, dialogue] = await Promise.all([
+      loadJSON('data/config.json'),
+      loadJSON('data/catalog.json'),
+      loadJSON('data/dialogue.json'),
+    ]);
+
+    state.config   = config;
+    state.catalog  = catalog;
+    state.dialogue = dialogue;
+
+    applyConfig(config);
+    renderCatalog();
+  }
+
+  function applyConfig(cfg) {
+    // Título
+    document.title = cfg.store.name;
+
+    // CSS vars desde config
+    const root = document.documentElement.style;
+    const c    = cfg.colors;
+    if (c.background)   root.setProperty('--bg',            c.background);
+    if (c.panel)        root.setProperty('--panel',         c.panel);
+    if (c.border)       root.setProperty('--border',        c.border);
+    if (c.text)         root.setProperty('--text',          c.text);
+    if (c.textDim)      root.setProperty('--text-dim',      c.textDim);
+    if (c.accent)       root.setProperty('--accent',        c.accent);
+    if (c.verbBg)       root.setProperty('--verb-bg',       c.verbBg);
+    if (c.verbHover)    root.setProperty('--verb-hover',    c.verbHover);
+    if (c.inventoryBg)  root.setProperty('--inventory-bg',  c.inventoryBg);
+
+    // Font
+    if (cfg.font?.googleFontsUrl) {
+      document.getElementById('google-font').href = cfg.font.googleFontsUrl;
+    }
+
+    // Nombre NPC en diálogo
+    el.dialogueSpeaker.textContent = cfg.npc?.name ?? 'NPC';
+
+    // Fondo escena (si hay imagen)
+    if (cfg.scene?.backgroundImage) {
+      const fallback = document.getElementById('scene-bg-fallback');
+      if (fallback) {
+        fallback.innerHTML = `<img id="scene-bg" src="${cfg.scene.backgroundImage}" alt="escena">`;
+      }
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  async function init() {
+    try {
+      await loadData();
+    } catch (e) {
+      console.warn('Error cargando datos:', e.message);
+    }
+
+    initCursor();
+    initVerbBar();
+    initHotspots();
+
+    el.catalogClose.addEventListener('click', closeCatalog);
+
+    // Cerrar diálogo con Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        closeDialogue();
+        closeCatalog();
+      }
+    });
+
+    // Demo: seleccionar verbo "Hablar" activa el NPC directamente
+    el.actionLine.textContent = 'Elige un verbo y haz click en la escena.';
+  }
+
+  return { init, addToInventory, notify };
+
+})();
+
+// Arrancar cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', Game.init);
+</script>
+
+</body>
+</html>

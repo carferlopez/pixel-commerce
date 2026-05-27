@@ -1,0 +1,57 @@
+[
+  {
+    "id": "jacket-01",
+    "name": "Chaqueta Nocturna",
+    "description": "Terciopelo negro con bordados de constelaciones. Edición limitada.",
+    "price": 189,
+    "currency": "EUR",
+    "image": "",
+    "badge": "SOLD OUT",
+    "available": false,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "ring-01",
+    "name": "Anillo Espejo",
+    "description": "Plata de ley. Refleja lo que quieres ver, no lo que eres.",
+    "price": 79,
+    "currency": "EUR",
+    "image": "",
+    "badge": "",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "print-01",
+    "name": "Print #001",
+    "description": "Risografía dos tintas. 297×420mm. Tirada de 50.",
+    "price": 35,
+    "currency": "EUR",
+    "image": "",
+    "badge": "ÚLTIMAS 3",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "zine-01",
+    "name": "Fanzine Vol. 1",
+    "description": "32 páginas. Impresión risografía. Envío incluido en España.",
+    "price": 12,
+    "currency": "EUR",
+    "image": "",
+    "badge": "NUEVO",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "candle-01",
+    "name": "Vela Archivo",
+    "description": "Cera de soja. Aroma a papel viejo y cedro. 40h de combustión.",
+    "price": 24,
+    "currency": "EUR",
+    "image": "",
+    "badge": "",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  }
+]

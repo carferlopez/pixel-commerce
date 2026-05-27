@@ -1,0 +1,38 @@
+{
+  "store": {
+    "name": "The Pixel Shop",
+    "tagline": "A peculiar place for peculiar things.",
+    "currency": "EUR",
+    "locale": "es-ES"
+  },
+  "colors": {
+    "background": "#1a1a2e",
+    "panel": "#16213e",
+    "border": "#e94560",
+    "text": "#eaeaea",
+    "textDim": "#888",
+    "accent": "#e94560",
+    "verbBg": "#0f3460",
+    "verbHover": "#e94560",
+    "verbActive": "#fff",
+    "inventoryBg": "#0f3460"
+  },
+  "font": {
+    "family": "'Press Start 2P', monospace",
+    "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap"
+  },
+  "scene": {
+    "width": 800,
+    "height": 450,
+    "backgroundImage": "",
+    "backgroundFallbackColor": "#1a1a2e"
+  },
+  "stripe": {
+    "checkoutUrl": "https://buy.stripe.com/REEMPLAZA_CON_TU_LINK"
+  },
+  "npc": {
+    "name": "Ada",
+    "spriteIdle": "",
+    "greetingLine": "Bienvenido... llevaba tiempo esperando a alguien como tú."
+  }
+}

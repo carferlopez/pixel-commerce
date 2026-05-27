@@ -1,0 +1,55 @@
+{
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "speaker": "Ada",
+      "text": "Llevaba tiempo esperando a alguien como tú. ¿Qué te trae por aquí?",
+      "choices": [
+        { "label": "Ver qué vendes",          "next": "show_catalog" },
+        { "label": "¿Quién eres tú?",         "next": "about_npc" },
+        { "label": "Solo estoy mirando.",      "next": "just_looking" }
+      ]
+    },
+
+    "show_catalog": {
+      "speaker": "Ada",
+      "text": "Todo lo que ves aquí lo hago yo misma. Cada pieza tiene historia. Mira con calma.",
+      "choices": [],
+      "action": "OPEN_CATALOG"
+    },
+
+    "about_npc": {
+      "speaker": "Ada",
+      "text": "Coleccionista, diseñadora, archivista. Según el día. Lo importante es que cada cosa aquí tiene un dueño que aún no sabe que la necesita.",
+      "choices": [
+        { "label": "¿Y cómo sé que es para mí?", "next": "how_to_know" },
+        { "label": "Ver el catálogo.",             "next": "show_catalog" }
+      ]
+    },
+
+    "how_to_know": {
+      "speaker": "Ada",
+      "text": "Si llevas más de diez segundos mirando algo, ya es tuyo. Solo falta el ritual del pago.",
+      "choices": [
+        { "label": "De acuerdo. Muéstrame.",  "next": "show_catalog" },
+        { "label": "Déjame pensarlo.",        "next": "goodbye" }
+      ]
+    },
+
+    "just_looking": {
+      "speaker": "Ada",
+      "text": "Nadie entra aquí 'solo a mirar'. Pero tómate tu tiempo.",
+      "choices": [
+        { "label": "Quizá tienes razón. ¿Qué tienes?", "next": "show_catalog" },
+        { "label": "Me voy.",                            "next": "goodbye" }
+      ]
+    },
+
+    "goodbye": {
+      "speaker": "Ada",
+      "text": "Vuelve cuando estés listo. Aquí estaré.",
+      "choices": [],
+      "action": "CLOSE_DIALOGUE"
+    }
+  }
+}
