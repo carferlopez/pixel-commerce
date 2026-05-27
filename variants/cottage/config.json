@@ -1,0 +1,38 @@
+{
+  "store": {
+    "name": "Cottage General Store",
+    "tagline": "Handmade goods, honest prices.",
+    "currency": "EUR",
+    "locale": "es-ES"
+  },
+  "colors": {
+    "background": "#1c120a",
+    "panel":      "#2e1f10",
+    "border":     "#8fbc6a",
+    "text":       "#f5deb3",
+    "textDim":    "#a08060",
+    "accent":     "#8fbc6a",
+    "verbBg":     "#3a2510",
+    "verbHover":  "#8fbc6a",
+    "inventoryBg":"#3a2510"
+  },
+  "font": {
+    "family": "'VT323', monospace",
+    "googleFontsUrl": "https://fonts.googleapis.com/css2?family=VT323&display=swap"
+  },
+  "stripe": {
+    "checkoutUrl": "https://buy.stripe.com/REEMPLAZA_CON_TU_LINK"
+  },
+  "npc": {
+    "name": "Marta",
+    "greetingLine": "Buenas tardes. ¿Puedo ayudarte en algo?"
+  },
+  "audio": {
+    "enabled": true,
+    "click": "assets/audio/click.wav",
+    "notify": "assets/audio/notify.wav",
+    "ambient": "assets/audio/ambient.mp3",
+    "ambientVolume": 0.25,
+    "defaultMuted": false
+  }
+}

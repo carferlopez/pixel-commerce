@@ -1,0 +1,57 @@
+[
+  {
+    "id": "honey-01",
+    "name": "Miel de Brezo",
+    "description": "500g. Recolectada en agosto. Sabor intenso con notas de caramelo.",
+    "price": 14,
+    "currency": "EUR",
+    "image": "",
+    "badge": "TEMPORADA",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "jam-01",
+    "name": "Mermelada de Ciruela",
+    "description": "350g. Receta de 1987. Sin conservantes. Fruta de huerto propio.",
+    "price": 9,
+    "currency": "EUR",
+    "image": "",
+    "badge": "",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "candle-01",
+    "name": "Vela de Cera de Abeja",
+    "description": "Cera 100% natural. Aroma miel y lavanda. 60h de combustión.",
+    "price": 18,
+    "currency": "EUR",
+    "image": "",
+    "badge": "ARTESANAL",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "herbs-01",
+    "name": "Mix de Hierbas Secas",
+    "description": "Lavanda, romero y tomillo. Secado al sol. Bolsa de tela de 80g.",
+    "price": 7,
+    "currency": "EUR",
+    "image": "",
+    "badge": "",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  },
+  {
+    "id": "soap-01",
+    "name": "Jabón de Avena",
+    "description": "100g. Piel seca y sensible. Ingredientes: avena, aceite de oliva, sosa.",
+    "price": 6,
+    "currency": "EUR",
+    "image": "",
+    "badge": "ÚLTIMAS 5",
+    "available": true,
+    "stripeUrl": "https://buy.stripe.com/REEMPLAZA"
+  }
+]

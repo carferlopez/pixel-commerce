@@ -1,0 +1,55 @@
+{
+  "start": "greeting",
+  "nodes": {
+    "greeting": {
+      "speaker": "Marta",
+      "text": "Buenas tardes. Llevo treinta años en este local. ¿Puedo ayudarte en algo?",
+      "choices": [
+        { "label": "Ver qué tienes",          "next": "show_catalog" },
+        { "label": "¿De dónde vienen los productos?", "next": "about_products" },
+        { "label": "Solo estoy mirando.",      "next": "just_looking" }
+      ]
+    },
+
+    "show_catalog": {
+      "speaker": "Marta",
+      "text": "Aquí tienes. Todo lo que ves lo hacemos en casa o lo compramos a vecinos del valle.",
+      "choices": [],
+      "action": "OPEN_CATALOG"
+    },
+
+    "about_products": {
+      "speaker": "Marta",
+      "text": "La miel es de las colmenas de mi marido. Las mermeladas las hago yo. El jabón lo trae Carmen del pueblo de al lado. Nada viene de fábrica.",
+      "choices": [
+        { "label": "Quiero ver el catálogo.", "next": "show_catalog" },
+        { "label": "Gracias por contármelo.", "next": "goodbye" }
+      ]
+    },
+
+    "just_looking": {
+      "speaker": "Marta",
+      "text": "Tómate tu tiempo. Si necesitas algo, aquí estoy.",
+      "choices": [
+        { "label": "En realidad, ¿qué me recomiendas?", "next": "recommendation" },
+        { "label": "Gracias.",                           "next": "goodbye" }
+      ]
+    },
+
+    "recommendation": {
+      "speaker": "Marta",
+      "text": "La miel de brezo. Es lo que más me preguntan y lo que antes se acaba cada año.",
+      "choices": [
+        { "label": "Me la llevo.", "next": "show_catalog" },
+        { "label": "Lo pensaré.",  "next": "goodbye" }
+      ]
+    },
+
+    "goodbye": {
+      "speaker": "Marta",
+      "text": "Hasta luego. Pasa cuando quieras.",
+      "choices": [],
+      "action": "CLOSE_DIALOGUE"
+    }
+  }
+}

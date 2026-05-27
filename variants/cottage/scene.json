@@ -1,0 +1,64 @@
+{
+  "background": {
+    "type": "image",
+    "src": "assets/background.png",
+    "fallback": "svg-inline"
+  },
+  "viewport": { "width": 800, "height": 450 },
+  "hotspots": [
+    {
+      "id": "shelves",
+      "name": "Estantería",
+      "rect": { "x": 36, "y": 50, "w": 212, "h": 165 },
+      "verbs": {
+        "Mirar":  "Tarros de conservas, velas, pequeños frascos ordenados.",
+        "Coger":  "Deja que Marta te lo sirva.",
+        "Usar":   "No es el momento.",
+        "Hablar": ""
+      },
+      "action": null
+    },
+    {
+      "id": "window",
+      "name": "Ventana",
+      "rect": { "x": 578, "y": 58, "w": 164, "h": 124 },
+      "verbs": {
+        "Mirar":  "El valle al atardecer. Niebla baja entre los árboles.",
+        "Coger":  "Solo puedes mirar.",
+        "Usar":   "No aplica.",
+        "Hablar": ""
+      },
+      "action": null
+    },
+    {
+      "id": "counter",
+      "name": "Mostrador",
+      "rect": { "x": 270, "y": 278, "w": 302, "h": 64 },
+      "verbs": {
+        "Mirar":  "Madera gastada por años de uso. Hay una balanza antigua al fondo.",
+        "Coger":  "Demasiado pesado.",
+        "Usar":   "Aquí se hacen las transacciones.",
+        "Hablar": ""
+      },
+      "action": null
+    },
+    {
+      "id": "npc",
+      "name": "Marta",
+      "rect": { "x": 468, "y": 158, "w": 96, "h": 160 },
+      "verbs": {
+        "Mirar":  "Una mujer de mediana edad con delantal de lino. Parece de fiar.",
+        "Coger":  "No es apropiado.",
+        "Usar":   "No es apropiado.",
+        "Hablar": "talk_to_npc"
+      },
+      "sprite": {
+        "src":    "assets/npc-marta.png",
+        "offset": { "x": 8, "y": 6 },
+        "width":  80,
+        "height": 150
+      },
+      "action": null
+    }
+  ]
+}
